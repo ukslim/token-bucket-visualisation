@@ -281,18 +281,17 @@ function drawBucket() {
   // Draw paths for items
   drawPaths();
 
-  // Draw the bucket border
-  ctx.fillStyle = "#555";
-  ctx.fillRect(BUCKET_X, BUCKET_Y, BUCKET_WIDTH, BUCKET_HEIGHT);
-
-  // Draw the bucket inner area (empty space)
-  ctx.fillStyle = "#222";
-  ctx.fillRect(
-    BUCKET_X + BUCKET_BORDER_WIDTH,
-    BUCKET_Y + BUCKET_BORDER_WIDTH,
-    BUCKET_WIDTH - 2 * BUCKET_BORDER_WIDTH,
-    BUCKET_HEIGHT - 2 * BUCKET_BORDER_WIDTH
-  );
+  // Draw the bucket outline
+  ctx.strokeStyle = "#AAF";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = BUCKET_BORDER_WIDTH;
+  ctx.beginPath();
+  ctx.moveTo(BUCKET_X, BUCKET_Y); // Start at top left
+  ctx.lineTo(BUCKET_X, BUCKET_Y + BUCKET_HEIGHT); // Draw left wall
+  ctx.lineTo(BUCKET_X + BUCKET_WIDTH, BUCKET_Y + BUCKET_HEIGHT); // Draw bottom wall
+  ctx.lineTo(BUCKET_X + BUCKET_WIDTH, BUCKET_Y); // Draw right wall
+  ctx.stroke();
 
   // Calculate token level height
   const maxInnerHeight = BUCKET_HEIGHT - 2 * BUCKET_BORDER_WIDTH;
@@ -302,9 +301,9 @@ function drawBucket() {
   // Draw the token level (water level)
   ctx.fillStyle = "#4a94ff";
   ctx.fillRect(
-    BUCKET_X + BUCKET_BORDER_WIDTH,
-    BUCKET_Y + BUCKET_HEIGHT - BUCKET_BORDER_WIDTH - levelHeight,
-    BUCKET_WIDTH - 2 * BUCKET_BORDER_WIDTH,
+    BUCKET_X + BUCKET_BORDER_WIDTH / 2,
+    BUCKET_Y + BUCKET_HEIGHT - BUCKET_BORDER_WIDTH / 2 - levelHeight,
+    BUCKET_WIDTH - BUCKET_BORDER_WIDTH,
     levelHeight
   );
 

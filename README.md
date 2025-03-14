@@ -6,6 +6,9 @@ services (for example, AWS API Gateway) to implement rate-limiting while allowin
 It's quite difficult to pick *rate* and *burst* parameters, and I found that visualising how they
 interact was helpful.
 
+This was largely written by AI, and it works, but it's not the 
+best piece of software engineering in the world by any means...
+
 # Run
 
 This is a Vite app.
