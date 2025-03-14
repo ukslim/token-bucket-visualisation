@@ -108,7 +108,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
           and requests will be dropped. However, since the bucket can hold a quantity of tokens, it can allow bursts of requests. 
         </p>
         <p>
-          Try setting the rate to 1, the burst to 1, requests per second to 1, and burstiness to 0. See how in its steady state, the bucket 
+          Try setting the rate to 1, the burst to 1, requests per second to 1, and burstiness to 0. <button id="try-steady-state" class="inline-button">Try it</button> See how in its steady state, the bucket 
           alternates between 1 and 0, and all requests are successful.
         </p>
         <p>
@@ -439,6 +439,70 @@ if (requestBurstinessInput) {
     const requestBurstiness = Number(requestBurstinessInput.value);
     state.requestBurstiness = requestBurstiness;
     requestBurstinessDisplay.textContent = requestBurstiness.toString();
+  });
+}
+
+// Add CSS for the inline button
+document.head.insertAdjacentHTML(
+  "beforeend",
+  `
+  <style>
+    .inline-button {
+      display: inline-block;
+      font-size: 0.8em;
+      padding: 2px 8px;
+      margin: 0 5px;
+      background-color: #4a94ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    .inline-button:hover {
+      background-color: #3a84ef;
+    }
+  </style>
+`
+);
+
+// Add event listener for the "Try it" button
+const trySteadyStateButton = document.getElementById("try-steady-state");
+if (trySteadyStateButton) {
+  trySteadyStateButton.addEventListener("click", () => {
+    // Set the parameters as suggested in the text
+    const tokensPerSecondInput = document.getElementById(
+      "tokens-per-second"
+    ) as HTMLInputElement;
+    const bucketSizeInput = document.getElementById(
+      "bucket-size"
+    ) as HTMLInputElement;
+    const requestsPerSecondInput = document.getElementById(
+      "requests-per-second"
+    ) as HTMLInputElement;
+    const requestBurstinessInput = document.getElementById(
+      "request-burstiness"
+    ) as HTMLInputElement;
+
+    // Set values
+    tokensPerSecondInput.value = "1";
+    bucketSizeInput.value = "1";
+    requestsPerSecondInput.value = "1";
+    requestBurstinessInput.value = "0";
+
+    // Trigger the input events to update the state
+    tokensPerSecondInput.dispatchEvent(new Event("input"));
+    bucketSizeInput.dispatchEvent(new Event("input"));
+    requestsPerSecondInput.dispatchEvent(new Event("input"));
+    requestBurstinessInput.dispatchEvent(new Event("input"));
+
+    // Reset the simulation with the new parameters
+    const resetButton = document.getElementById(
+      "reset-simulation"
+    ) as HTMLButtonElement;
+    if (resetButton) {
+      resetButton.click();
+    }
   });
 }
 
