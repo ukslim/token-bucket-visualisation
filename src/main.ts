@@ -215,12 +215,12 @@ function drawItem(item: Item) {
   // Draw a smaller outline for the item
   ctx.beginPath();
   ctx.arc(x + ITEM_SIZE / 2, y, ITEM_SIZE / 2 + 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "#fff";
+  ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
   ctx.stroke();
 
   // Add a label to the item to make it more clear
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#000";
   ctx.font = "10px Arial";
   ctx.textAlign = "center";
   ctx.fillText(item.type.charAt(0).toUpperCase(), x + ITEM_SIZE / 2, y + 3);
@@ -308,7 +308,7 @@ function drawBucket() {
   );
 
   // Draw token level text
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#000";
   ctx.font = "24px Arial";
   ctx.textAlign = "center";
   ctx.fillText(
