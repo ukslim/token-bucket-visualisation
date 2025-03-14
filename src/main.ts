@@ -11,8 +11,8 @@ import {
 const DEFAULT_BUCKET_MAX_LEVEL = 10;
 const DEFAULT_TOKENS_PER_SECOND = 1;
 const DEFAULT_FRAMES_PER_SECOND = 30;
-const DEFAULT_REQUESTS_PER_SECOND = 0;
-const DEFAULT_REQUEST_BURSTINESS = 0;
+const DEFAULT_REQUESTS_PER_SECOND = 1;
+const DEFAULT_REQUEST_BURSTINESS = 0.5;
 
 let state = createInitialState(
   DEFAULT_BUCKET_MAX_LEVEL,
@@ -294,21 +294,15 @@ function drawBucket() {
   state.items.forEach(drawItem);
 
   // Draw labels
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#000";
   ctx.font = "16px Arial";
-  ctx.textAlign = "center";
-
-  // Token rate label
-  ctx.fillText(
-    `Token Rate: ${state.tokensPerSecond}/sec`,
-    CANVAS_WIDTH / 2,
-    BUCKET_Y - 20
-  );
+  ctx.textAlign = "left";
 
   // Label the item paths
   ctx.font = "12px Arial";
   ctx.fillText("Tokens", ITEM_PADDING * 2, TOKEN_Y - 15);
   ctx.fillText("Requests", ITEM_PADDING * 2, REQUEST_Y - 15);
+  ctx.textAlign = "right";
   ctx.fillText("Processed", CANVAS_WIDTH - ITEM_PADDING * 5, PROCESSED_Y - 15);
   ctx.fillText("Dropped", CANVAS_WIDTH - ITEM_PADDING * 5, DROPPED_Y - 15);
 }
