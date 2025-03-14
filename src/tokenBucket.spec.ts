@@ -1,3 +1,4 @@
+import { BurstyRequestGenerator } from "./bursty-request-generator";
 import {
   addRequest,
   addToken,
@@ -5,6 +6,8 @@ import {
   formatState,
   updateState,
 } from "./tokenBucket";
+
+jest.mock("./bursty-request-generator");
 
 describe("Token Bucket", () => {
   test("creates initial state with correct values", () => {
@@ -184,5 +187,77 @@ describe("Token Bucket", () => {
         "Dropped: [180]\n" +
         "Processed: [150]"
     );
+  });
+
+  describe("BurstyRequestGenerator integration", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("initializes the BurstyRequestGenerator with correct parameters", () => {
+      const state = createInitialState(10, 1, 30, 2, 0.5);
+
+      expect(state.requestGenerator).toBeDefined();
+      expect(BurstyRequestGenerator).toHaveBeenCalledWith(2 / 30, 0.5);
+    });
+
+    it("uses the BurstyRequestGenerator to decide when to create requests", () => {
+      const mockTick = jest.fn();
+      const mockGenerator = {
+        tick: mockTick,
+        setMeanRPS: jest.fn(),
+        setBurstiness: jest.fn(),
+      };
+      mockTick.mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+      const { BurstyRequestGenerator } = jest.requireMock(
+        "./bursty-request-generator"
+      );
+      BurstyRequestGenerator.mockImplementation(() => mockGenerator);
+
+      const state = createInitialState(10, 1, 30, 2, 0.5);
+
+      // First update - tick returns false, no request should be created
+      const updatedState1 = updateState(state);
+      expect(mockTick).toHaveBeenCalledWith(1); // deltaTime = 1/framesPerSecond
+      expect(
+        updatedState1.items.filter((item) => item.type === "request").length
+      ).toBe(0);
+
+      // Second update - tick returns true, a request should be created
+      const updatedState2 = updateState(updatedState1);
+      expect(mockTick).toHaveBeenCalledTimes(2);
+      expect(
+        updatedState2.items.filter((item) => item.type === "request").length
+      ).toBe(1);
+    });
+
+    it("updates the BurstyRequestGenerator when request parameters change", () => {
+      const mockSetMeanRPS = jest.fn();
+      const mockSetBurstiness = jest.fn();
+      const mockGenerator = {
+        tick: jest.fn().mockReturnValue(false),
+        setMeanRPS: mockSetMeanRPS,
+        setBurstiness: mockSetBurstiness,
+      };
+
+      const { BurstyRequestGenerator } = jest.requireMock(
+        "./bursty-request-generator"
+      );
+      BurstyRequestGenerator.mockImplementation(() => mockGenerator);
+
+      // Create initial state
+      const state = createInitialState(10, 1, 30, 2, 0.5);
+
+      // Update request rate
+      state.requestsPerSecond = 3;
+      state.requestGenerator.setMeanRPS(3);
+      expect(mockSetMeanRPS).toHaveBeenCalledWith(3);
+
+      // Update burstiness
+      state.requestBurstiness = 1.5;
+      state.requestGenerator.setBurstiness(1.5);
+      expect(mockSetBurstiness).toHaveBeenCalledWith(1.5);
+    });
   });
 });

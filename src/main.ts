@@ -413,14 +413,10 @@ if (requestsPerSecondInput) {
     const requestsPerSecond = Number(requestsPerSecondInput.value);
     state.requestsPerSecond = requestsPerSecond;
 
-    // Reset the frames until next request
-    if (requestsPerSecond > 0) {
-      state.framesUntilNextRequest = Math.floor(
-        state.framesPerSecond / requestsPerSecond
-      );
-    } else {
-      state.framesUntilNextRequest = 0;
-    }
+    // Update the bursty request generator with the new rate
+    state.requestGenerator.setMeanRPS(
+      requestsPerSecond / DEFAULT_FRAMES_PER_SECOND
+    );
 
     requestRateDisplay.textContent = requestsPerSecond.toString();
   });
@@ -434,6 +430,10 @@ if (requestBurstinessInput) {
   requestBurstinessInput.addEventListener("input", () => {
     const requestBurstiness = Number(requestBurstinessInput.value);
     state.requestBurstiness = requestBurstiness;
+
+    // Update the bursty request generator with the new burstiness
+    state.requestGenerator.setBurstiness(requestBurstiness);
+
     requestBurstinessDisplay.textContent = requestBurstiness.toString();
   });
 }
@@ -474,10 +474,15 @@ if (noBurstDemo) {
     ) as HTMLButtonElement;
     if (resetButton) {
       resetButton.click();
-      // set an offset between token and request emission
-      // so that you can see the bucket alternate between 0 and 1
-      state.framesUntilNextToken = 0;
-      state.framesUntilNextRequest = Math.floor(DEFAULT_FRAMES_PER_SECOND / 2);
+
+      // Reset the request generator's internal state
+
+      // Set an initial offset to make the visualization clearer
+      state.framesUntilNextToken = Math.floor(DEFAULT_FRAMES_PER_SECOND / 2);
+
+      // Reset the request generator's time to create a predictable pattern
+      state.requestGenerator.currentTime = 0;
+      state.requestGenerator.nextEventTime = 0.5; // Start the first request after half a second
     }
   });
 }

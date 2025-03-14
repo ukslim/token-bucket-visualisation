@@ -3,6 +3,8 @@
  * This file contains the data structures and logic for simulating a token bucket algorithm
  */
 
+import { BurstyRequestGenerator } from "./bursty-request-generator";
+
 // Type representing an item (request or token)
 export type Item = {
   id: number; // Unique identifier
@@ -30,6 +32,8 @@ export type State = {
   requestsPerSecond: number;
   requestBurstiness: number;
   framesUntilNextRequest: number;
+  // Bursty request generator
+  requestGenerator: BurstyRequestGenerator;
 };
 
 // Constants for animation
@@ -45,7 +49,7 @@ export function createInitialState(
   tokensPerSecond: number,
   framesPerSecond: number,
   requestsPerSecond: number = 0,
-  requestBurstiness: number = 0
+  requestBurstiness: number = 1
 ): State {
   return {
     bucket: {
@@ -64,28 +68,24 @@ export function createInitialState(
       requestsPerSecond > 0
         ? Math.floor(framesPerSecond / requestsPerSecond)
         : 0,
+    requestGenerator: new BurstyRequestGenerator(
+      requestsPerSecond / framesPerSecond,
+      requestBurstiness
+    ),
   };
 }
 
 /**
  * Add a new request to the system
  */
-export function addRequest(state: State, burstiness: number = 0): State {
+export function addRequest(state: State): State {
   // Calculate initial age based on burstiness
   // Higher burstiness means more variation in starting positions
-  let initialAge = 0;
-
-  if (burstiness > 0) {
-    // Generate a random age between 0 and (burstiness * FRAMES_TO_REACH_BUCKET / 2)
-    // This makes some requests appear closer to the bucket (higher initial age)
-    const maxOffset = Math.floor((burstiness * FRAMES_TO_REACH_BUCKET) / 2);
-    initialAge = Math.floor(Math.random() * maxOffset);
-  }
 
   const newItem: Item = {
     id: state.nextId,
-    age: initialAge,
-    position: Math.floor((initialAge / FRAMES_TO_REACH_BUCKET) * 100), // Calculate position based on age
+    age: 0,
+    position: 0,
     type: "request",
   };
 
@@ -181,7 +181,7 @@ export function formatState(state: State): string {
  * Update the state for one frame of animation
  */
 export function updateState(state: State): State {
-  const newState = { ...state, frameCount: state.frameCount + 1 };
+  let newState = { ...state, frameCount: state.frameCount + 1 };
 
   // Update token generation timer
   newState.framesUntilNextToken = Math.max(
@@ -189,22 +189,14 @@ export function updateState(state: State): State {
     newState.framesUntilNextToken - 1
   );
 
-  // Update request generation timer
-  if (newState.requestsPerSecond > 0) {
-    newState.framesUntilNextRequest = Math.max(
-      0,
-      newState.framesUntilNextRequest - 1
-    );
-  }
-
   // Add new token if it's time
   if (newState.framesUntilNextToken === 0) {
     return updateState(addToken(newState));
   }
 
-  // Add new request if it's time and auto request generation is enabled
-  if (newState.requestsPerSecond > 0 && newState.framesUntilNextRequest === 0) {
-    return updateState(addRequest(newState, newState.requestBurstiness));
+  // Check if we should generate a request using the BurstyRequestGenerator
+  if (newState.requestsPerSecond > 0 && newState.requestGenerator.tick(1)) {
+    newState = addRequest(newState);
   }
 
   // Update all items
