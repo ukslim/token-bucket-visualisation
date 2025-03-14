@@ -11,11 +11,15 @@ import {
 const DEFAULT_BUCKET_MAX_LEVEL = 10;
 const DEFAULT_TOKENS_PER_SECOND = 1;
 const DEFAULT_FRAMES_PER_SECOND = 30;
+const DEFAULT_REQUESTS_PER_SECOND = 0;
+const DEFAULT_REQUEST_BURSTINESS = 0;
 
 let state = createInitialState(
   DEFAULT_BUCKET_MAX_LEVEL,
   DEFAULT_TOKENS_PER_SECOND,
-  DEFAULT_FRAMES_PER_SECOND
+  DEFAULT_FRAMES_PER_SECOND,
+  DEFAULT_REQUESTS_PER_SECOND,
+  DEFAULT_REQUEST_BURSTINESS
 );
 
 let isRunning = true;
@@ -65,17 +69,31 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
         <input type="range" id="bucket-size" min="1" max="20" step="1" value="${DEFAULT_BUCKET_MAX_LEVEL}">
         <span id="bucket-size-value">${DEFAULT_BUCKET_MAX_LEVEL}</span>
       </div>
+      
+      <div class="setting">
+        <label for="requests-per-second">Auto requests per second:</label>
+        <input type="range" id="requests-per-second" min="0" max="3" step="0.1" value="${DEFAULT_REQUESTS_PER_SECOND}">
+        <span id="requests-per-second-value">${DEFAULT_REQUESTS_PER_SECOND}</span>
+      </div>
+      
+      <div class="setting">
+        <label for="request-burstiness">Request burstiness:</label>
+        <input type="range" id="request-burstiness" min="0" max="1" step="0.1" value="${DEFAULT_REQUEST_BURSTINESS}">
+        <span id="request-burstiness-value">${DEFAULT_REQUEST_BURSTINESS}</span>
+      </div>
     </div>
     
     <div class="visualization">
       <canvas id="bucket-canvas" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"></canvas>
     </div>
     
+    <!--
     <div class="simulation-status">
       <div>Frame: <span id="frame-count">0</span></div>
     </div>
     
-    <pre id="state-display"></pre>
+     <pre id="state-display"></pre>
+      -->
   </div>
 `;
 
@@ -89,6 +107,12 @@ const tokenRateDisplay = document.getElementById(
 ) as HTMLSpanElement;
 const bucketSizeDisplay = document.getElementById(
   "bucket-size-value"
+) as HTMLSpanElement;
+const requestRateDisplay = document.getElementById(
+  "requests-per-second-value"
+) as HTMLSpanElement;
+const requestBurstinessDisplay = document.getElementById(
+  "request-burstiness-value"
 ) as HTMLSpanElement;
 const canvas = document.getElementById("bucket-canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
@@ -318,11 +342,19 @@ if (resetButton) {
     const bucketSize = Number(
       (document.getElementById("bucket-size") as HTMLInputElement).value
     );
+    const requestsPerSecond = Number(
+      (document.getElementById("requests-per-second") as HTMLInputElement).value
+    );
+    const requestBurstiness = Number(
+      (document.getElementById("request-burstiness") as HTMLInputElement).value
+    );
 
     state = createInitialState(
       bucketSize,
       tokensPerSecond,
-      DEFAULT_FRAMES_PER_SECOND
+      DEFAULT_FRAMES_PER_SECOND,
+      requestsPerSecond,
+      requestBurstiness
     );
   });
 }
@@ -355,6 +387,40 @@ if (bucketSizeInput) {
   });
 }
 
+// Update request rate
+const requestsPerSecondInput = document.getElementById(
+  "requests-per-second"
+) as HTMLInputElement;
+if (requestsPerSecondInput) {
+  requestsPerSecondInput.addEventListener("input", () => {
+    const requestsPerSecond = Number(requestsPerSecondInput.value);
+    state.requestsPerSecond = requestsPerSecond;
+
+    // Reset the frames until next request
+    if (requestsPerSecond > 0) {
+      state.framesUntilNextRequest = Math.floor(
+        state.framesPerSecond / requestsPerSecond
+      );
+    } else {
+      state.framesUntilNextRequest = 0;
+    }
+
+    requestRateDisplay.textContent = requestsPerSecond.toString();
+  });
+}
+
+// Update request burstiness
+const requestBurstinessInput = document.getElementById(
+  "request-burstiness"
+) as HTMLInputElement;
+if (requestBurstinessInput) {
+  requestBurstinessInput.addEventListener("input", () => {
+    const requestBurstiness = Number(requestBurstinessInput.value);
+    state.requestBurstiness = requestBurstiness;
+    requestBurstinessDisplay.textContent = requestBurstiness.toString();
+  });
+}
+
 // Animation loop
 function animationLoop(timestamp: number) {
   // Calculate time difference
@@ -366,8 +432,12 @@ function animationLoop(timestamp: number) {
     state = updateState(state);
 
     // Update displays
-    stateDisplay.textContent = formatState(state);
-    frameCountDisplay.textContent = state.frameCount.toString();
+    if (stateDisplay) {
+      stateDisplay.textContent = formatState(state);
+    }
+    if (frameCountDisplay) {
+      frameCountDisplay.textContent = state.frameCount.toString();
+    }
 
     // Draw the bucket visualization
     drawBucket();

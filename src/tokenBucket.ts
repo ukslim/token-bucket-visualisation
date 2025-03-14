@@ -26,6 +26,10 @@ export type State = {
   tokensPerSecond: number;
   framesPerSecond: number;
   framesUntilNextToken: number;
+  // Request producer parameters
+  requestsPerSecond: number;
+  requestBurstiness: number;
+  framesUntilNextRequest: number;
 };
 
 // Constants for animation
@@ -39,7 +43,9 @@ const DROPPED_ITEM_LIFETIME = 120; // How many frames a dropped item lives after
 export function createInitialState(
   maxLevel: number,
   tokensPerSecond: number,
-  framesPerSecond: number
+  framesPerSecond: number,
+  requestsPerSecond: number = 0,
+  requestBurstiness: number = 0
 ): State {
   return {
     bucket: {
@@ -52,17 +58,34 @@ export function createInitialState(
     tokensPerSecond,
     framesPerSecond,
     framesUntilNextToken: Math.floor(framesPerSecond / tokensPerSecond),
+    requestsPerSecond,
+    requestBurstiness,
+    framesUntilNextRequest:
+      requestsPerSecond > 0
+        ? Math.floor(framesPerSecond / requestsPerSecond)
+        : 0,
   };
 }
 
 /**
  * Add a new request to the system
  */
-export function addRequest(state: State): State {
+export function addRequest(state: State, burstiness: number = 0): State {
+  // Calculate initial age based on burstiness
+  // Higher burstiness means more variation in starting positions
+  let initialAge = 0;
+
+  if (burstiness > 0) {
+    // Generate a random age between 0 and (burstiness * FRAMES_TO_REACH_BUCKET / 2)
+    // This makes some requests appear closer to the bucket (higher initial age)
+    const maxOffset = Math.floor((burstiness * FRAMES_TO_REACH_BUCKET) / 2);
+    initialAge = Math.floor(Math.random() * maxOffset);
+  }
+
   const newItem: Item = {
     id: state.nextId,
-    age: 0,
-    position: 0,
+    age: initialAge,
+    position: Math.floor((initialAge / FRAMES_TO_REACH_BUCKET) * 100), // Calculate position based on age
     type: "request",
   };
 
@@ -70,6 +93,11 @@ export function addRequest(state: State): State {
     ...state,
     items: [...state.items, newItem],
     nextId: state.nextId + 1,
+    // Reset the request timer if this was an auto-generated request
+    framesUntilNextRequest:
+      state.requestsPerSecond > 0
+        ? Math.floor(state.framesPerSecond / state.requestsPerSecond)
+        : state.framesUntilNextRequest,
   };
 }
 
@@ -146,12 +174,25 @@ export function updateState(state: State): State {
     newState.framesUntilNextToken - 1
   );
 
+  // Update request generation timer
+  if (newState.requestsPerSecond > 0) {
+    newState.framesUntilNextRequest = Math.max(
+      0,
+      newState.framesUntilNextRequest - 1
+    );
+  }
+
   // Add new token if it's time
   if (
     newState.framesUntilNextToken === 0 &&
     newState.bucket.level < newState.bucket.maxLevel
   ) {
     return updateState(addToken(newState));
+  }
+
+  // Add new request if it's time and auto request generation is enabled
+  if (newState.requestsPerSecond > 0 && newState.framesUntilNextRequest === 0) {
+    return updateState(addRequest(newState, newState.requestBurstiness));
   }
 
   // Update all items
