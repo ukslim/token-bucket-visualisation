@@ -49,7 +49,10 @@ const DROPPED_Y = BUCKET_Y + BUCKET_HEIGHT + 30; // Dropped items exit much lowe
 // Setup the UI
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-    <h1>Token Bucket Algorithm Simulation</h1>
+
+    <div class="visualization">
+      <canvas id="bucket-canvas" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"></canvas>
+    </div>
     
     <div class="controls">
       <button id="add-request">Add Request</button>
@@ -59,33 +62,31 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     
     <div class="settings">
       <div class="setting">
-        <label for="tokens-per-second">Tokens per second:</label>
+        <label for="tokens-per-second">Tokens per second ("rate"):</label>
         <input type="range" id="tokens-per-second" min="0.1" max="5" step="0.1" value="${DEFAULT_TOKENS_PER_SECOND}">
         <span id="tokens-per-second-value">${DEFAULT_TOKENS_PER_SECOND}</span>
       </div>
       
       <div class="setting">
-        <label for="bucket-size">Bucket size:</label>
+        <label for="bucket-size">Bucket size ("burst"):</label>
         <input type="range" id="bucket-size" min="1" max="20" step="1" value="${DEFAULT_BUCKET_MAX_LEVEL}">
         <span id="bucket-size-value">${DEFAULT_BUCKET_MAX_LEVEL}</span>
       </div>
       
       <div class="setting">
         <label for="requests-per-second">Auto requests per second:</label>
-        <input type="range" id="requests-per-second" min="0" max="3" step="0.1" value="${DEFAULT_REQUESTS_PER_SECOND}">
+        <input type="range" id="requests-per-second" min="0" max="5" step="0.1" value="${DEFAULT_REQUESTS_PER_SECOND}">
         <span id="requests-per-second-value">${DEFAULT_REQUESTS_PER_SECOND}</span>
       </div>
       
       <div class="setting">
         <label for="request-burstiness">Request burstiness:</label>
-        <input type="range" id="request-burstiness" min="0" max="1" step="0.1" value="${DEFAULT_REQUEST_BURSTINESS}">
+        <input type="range" id="request-burstiness" min="0" max="2" step="0.1" value="${DEFAULT_REQUEST_BURSTINESS}">
         <span id="request-burstiness-value">${DEFAULT_REQUEST_BURSTINESS}</span>
       </div>
     </div>
     
-    <div class="visualization">
-      <canvas id="bucket-canvas" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"></canvas>
-    </div>
+
     
     <!--
     <div class="simulation-status">
@@ -94,6 +95,30 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     
      <pre id="state-display"></pre>
       -->
+
+      <div class="explanation">
+        <p>
+          This is a visualization of the <strong>token bucket algorithm</strong>, a method for rate-limiting requests. This algorithm is used
+          by AWS API Gateway, and others, to allow a certain number of requests per second, while still allowing bursts of requests.
+        </p>
+        <p>
+          To handle a request, a token must be removed from the bucket. If the bucket is empty, the request is dropped. Meanwhile, the
+          bucket is replenished at a configured rate. Therefore, if requests arrive more often than the refill rate, the bucket will empty
+          and requests will be dropped. However, since the bucket can hold a quantity of tokens, it can allow bursts of requests. 
+        </p>
+        <p>
+          Try setting the rate to 1, the burst to 1, requests per second to 1, and burstiness to 0. See how in its steady state, the bucket 
+          alternates between 1 and 0, and all requests are successful.
+        </p>
+        <p>
+          Now increase the "Request burstiness". This continues to emit requests at the same average rate, but their spacing is randomised. See how
+          now some requests are dropped, because they arrive before the bucket is replenished.
+        </p>
+        <p>
+          Play with the parameters and get a feel for how rate and burst work together.
+        </p>
+      </div>
+      
   </div>
 `;
 

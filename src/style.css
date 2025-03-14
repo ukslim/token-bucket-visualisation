@@ -64,6 +64,14 @@ h1 {
   color: #888;
 }
 
+.explanation {
+  max-width: 800px;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: left;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
