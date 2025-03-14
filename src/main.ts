@@ -50,7 +50,7 @@ const DROPPED_Y = BUCKET_Y + BUCKET_HEIGHT + 30; // Dropped items exit much lowe
 // Setup the UI
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
-
+    <h1>Token Bucket Visualization</h1>
     <div class="visualization">
       <canvas id="bucket-canvas" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"></canvas>
     </div>
@@ -118,8 +118,10 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
         <p>
           Play with the parameters and get a feel for how rate and burst work together.
         </p>
+        <p>
+          Source is on <a href="https://github.com/ukslim/token-bucket-visualisation">GitHub</a>.
+        </p>
       </div>
-      
   </div>
 `;
 

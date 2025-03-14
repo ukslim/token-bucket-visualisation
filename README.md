@@ -5,3 +5,16 @@ services (for example, AWS API Gateway) to implement rate-limiting while allowin
 
 It's quite difficult to pick *rate* and *burst* parameters, and I found that visualising how they
 interact was helpful.
+
+# Run
+
+This is a Vite app.
+
+```
+$ npm install 
+$ npm run dev
+```
+
+... or just visit it on GitHub Pages
+
+https://ukslim.github.io/token-bucket-visualisation/
