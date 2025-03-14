@@ -183,10 +183,7 @@ export function updateState(state: State): State {
   }
 
   // Add new token if it's time
-  if (
-    newState.framesUntilNextToken === 0 &&
-    newState.bucket.level < newState.bucket.maxLevel
-  ) {
+  if (newState.framesUntilNextToken === 0) {
     return updateState(addToken(newState));
   }
 
