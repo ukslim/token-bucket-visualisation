@@ -4,6 +4,7 @@ import {
   createInitialState,
   formatState,
   Item,
+  setBucketSize,
   updateState,
 } from "./tokenBucket";
 
@@ -400,8 +401,7 @@ const bucketSizeInput = document.getElementById(
 if (bucketSizeInput) {
   bucketSizeInput.addEventListener("input", () => {
     const bucketSize = Number(bucketSizeInput.value);
-    // Only update max level, don't change current level
-    state.bucket.maxLevel = bucketSize;
+    state = setBucketSize(state, bucketSize);
     bucketSizeDisplay.textContent = bucketSize.toString();
   });
 }

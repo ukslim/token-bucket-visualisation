@@ -123,6 +123,21 @@ export function addToken(state: State): State {
 }
 
 /**
+ * Set the bucket size (maxLevel) and ensure current level doesn't exceed it
+ */
+export function setBucketSize(state: State, newSize: number): State {
+  return {
+    ...state,
+    bucket: {
+      // Update max level
+      maxLevel: newSize,
+      // Ensure current level doesn't exceed the new max level
+      level: Math.min(state.bucket.level, newSize),
+    },
+  };
+}
+
+/**
  * Format the state as a readable text representation
  */
 export function formatState(state: State): string {
