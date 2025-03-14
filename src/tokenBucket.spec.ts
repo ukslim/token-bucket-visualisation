@@ -90,7 +90,6 @@ describe("Token Bucket", () => {
     }
 
     // Request should be dropped
-    console.log(state.items);
     expect(state.items[0].type).toBe("dropped");
     expect(state.bucket.level).toBe(0);
   });
