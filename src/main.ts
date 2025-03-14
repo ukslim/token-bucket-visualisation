@@ -235,26 +235,24 @@ function drawPaths() {
   // Set up dotted line style
   ctx.setLineDash([5, 5]);
   ctx.lineWidth = 1;
+  ctx.strokeStyle = "#000"; // Light green for tokens
 
   // Draw token input path
   ctx.beginPath();
   ctx.moveTo(ITEM_PADDING, TOKEN_Y);
   ctx.lineTo(BUCKET_X, TOKEN_Y);
-  ctx.strokeStyle = "rgba(74, 255, 148, 0.4)"; // Light green for tokens
   ctx.stroke();
 
   // Draw request input path
   ctx.beginPath();
   ctx.moveTo(ITEM_PADDING, REQUEST_Y);
   ctx.lineTo(BUCKET_X, REQUEST_Y);
-  ctx.strokeStyle = "rgba(255, 74, 74, 0.4)"; // Light red for requests
   ctx.stroke();
 
   // Draw processed output path
   ctx.beginPath();
   ctx.moveTo(BUCKET_X + BUCKET_WIDTH, PROCESSED_Y);
   ctx.lineTo(CANVAS_WIDTH - ITEM_PADDING, PROCESSED_Y);
-  ctx.strokeStyle = "rgba(74, 255, 255, 0.4)"; // Light cyan for processed
   ctx.stroke();
 
   // Draw dropped output path
@@ -262,7 +260,6 @@ function drawPaths() {
   ctx.moveTo(BUCKET_X + BUCKET_WIDTH / 2, BUCKET_Y + BUCKET_HEIGHT); // Start from bottom of bucket
   ctx.lineTo(BUCKET_X + BUCKET_WIDTH / 2, DROPPED_Y); // Go down
   ctx.lineTo(CANVAS_WIDTH - ITEM_PADDING, DROPPED_Y); // Go right
-  ctx.strokeStyle = "rgba(255, 255, 74, 0.4)"; // Light yellow for dropped
   ctx.stroke();
 
   // Reset line dash
