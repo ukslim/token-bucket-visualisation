@@ -108,7 +108,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
           and requests will be dropped. However, since the bucket can hold a quantity of tokens, it can allow bursts of requests. 
         </p>
         <p>
-          Try setting the rate to 1, the burst to 1, requests per second to 1, and burstiness to 0. <button id="try-steady-state" class="inline-button">Try it</button> See how in its steady state, the bucket 
+          Try setting the rate to 1, the burst to 1, requests per second to 1, and burstiness to 0. <button id="no-burst-demo" class="inline-button">Try it</button> See how in its steady state, the bucket 
           alternates between 1 and 0, and all requests are successful.
         </p>
         <p>
@@ -467,9 +467,9 @@ document.head.insertAdjacentHTML(
 );
 
 // Add event listener for the "Try it" button
-const trySteadyStateButton = document.getElementById("try-steady-state");
-if (trySteadyStateButton) {
-  trySteadyStateButton.addEventListener("click", () => {
+const noBurstDemo = document.getElementById("no-burst-demo");
+if (noBurstDemo) {
+  noBurstDemo.addEventListener("click", () => {
     // Set the parameters as suggested in the text
     const tokensPerSecondInput = document.getElementById(
       "tokens-per-second"
@@ -502,6 +502,10 @@ if (trySteadyStateButton) {
     ) as HTMLButtonElement;
     if (resetButton) {
       resetButton.click();
+      // set an offset between token and request emission
+      // so that you can see the bucket alternate between 0 and 1
+      state.framesUntilNextToken = 0;
+      state.framesUntilNextRequest = Math.floor(DEFAULT_FRAMES_PER_SECOND / 2);
     }
   });
 }
