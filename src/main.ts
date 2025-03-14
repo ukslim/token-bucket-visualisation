@@ -438,30 +438,6 @@ if (requestBurstinessInput) {
   });
 }
 
-// Add CSS for the inline button
-document.head.insertAdjacentHTML(
-  "beforeend",
-  `
-  <style>
-    .inline-button {
-      display: inline-block;
-      font-size: 0.8em;
-      padding: 2px 8px;
-      margin: 0 5px;
-      background-color: #4a94ff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      vertical-align: middle;
-    }
-    .inline-button:hover {
-      background-color: #3a84ef;
-    }
-  </style>
-`
-);
-
 // Add event listener for the "Try it" button
 const noBurstDemo = document.getElementById("no-burst-demo");
 if (noBurstDemo) {

@@ -185,6 +185,23 @@ button:focus-visible {
   }
 }
 
+.inline-button {
+  display: inline-block;
+  font-size: 0.8em;
+  padding: 2px 8px;
+  margin: 0 5px;
+  background-color: #4a94ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  vertical-align: baseline;
+  line-height: normal;
+}
+.inline-button:hover {
+  background-color: #3a84ef;
+}
+
 /* For light mode */
 @media (prefers-color-scheme: light) {
   :root {
